@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vue-camera</title>
+    <script src="/static/js/vue.global.js"></script>
+    <link rel="stylesheet" href="/static/css/index.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="iphone">
+        <video
+          id="video"
+          :width="videoWidth"
+          :height="videoHeight"
+          preload
+          autoplay
+          loop
+          muted
+        ></video>
+        <canvas
+          style="display: none"
+          id="canvas"
+          :width="videoWidth"
+          :height="videoHeight"
+        ></canvas>
+        <div class="footer">
+          <span @click="takePic" class="btn"></span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue
+      createApp({
+        data() {
+          return {
+            video: null,
+            canvas: null,
+            videoWidth: 0,
+            videoHeight: 0,
+            canvasContext: null,
+          }
+        },
+        mounted() {
+          this.video = document.querySelector('#video')
+          this.canvas = document.querySelector('#canvas')
+          this.videoHeight = document.documentElement.clientHeight
+          this.videoWidth = document.documentElement.clientWidth
+          this.canvasContext = this.canvas.getContext('2d')
+          this.getCamera()
+        },
+        methods: {
+          getCamera() {
+            if (navigator.mediaDevices === undefined) {
+              return
+            }
+            let constraints = {
+              audio: false,
+              video: {
+                width: this.videoWidth,
+                height: this.videoHeight,
+              },
+            }
+            navigator.mediaDevices
+              .getUserMedia(constraints)
+              .then((stream) => {
+                // 旧版浏览器使用
+                // let binaryData = []
+                // binaryData.push(stream)
+                // this.video.src = window.URL.createObjectURL(
+                //   new Blob(binaryData)
+                // )
+
+                // 新版浏览器
+                this.video.srcObject = stream
+                this.video.onloadedmetadata = () => {
+                  this.video.play()
+                }
+              })
+              .catch((err) => {
+                console.log(err)
+              })
+          },
+          takePic() {
+            this.canvasContext.drawImage(
+              this.video,
+              0,
+              0,
+              this.videoWidth,
+              this.videoHeight
+            )
+            // base64imgUrl
+            const img = this.canvas.toDataURL('image/png')
+            // 获取file文件
+            const file = this.dataURLtoFile(img, new Date().getTime())
+            // 保存到本地
+            let url = URL.createObjectURL(file)
+            let a = document.createElement('a')
+            a.style.display = 'none'
+            a.href = url
+            a.download = file.name
+            document.body.appendChild(a)
+            let evt = document.createEvent('MouseEvents')
+            evt.initEvent('click', true, true)
+            a.dispatchEvent(evt)
+            document.body.removeChild(a)
+          },
+          // base64转文件
+          dataURLtoFile(dataurl, filename) {
+            var arr = dataurl.split(',')
+            var mime = arr[0].match(/:(.*?);/)[1]
+            var bstr = atob(arr[1])
+            var n = bstr.length
+            var u8arr = new Uint8Array(n)
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n)
+            }
+            return new File([u8arr], filename, { type: mime })
+          },
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>
