@@ -8,7 +8,6 @@
     <script src="/static/js/vue.global.js"></script>
     <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
     <link rel="stylesheet" href="/static/css/index.css" />
-
   </head>
 
   <body>
@@ -16,10 +15,14 @@
       <div class="iphone">
         <div class="header">
           <span class="left">中国电信</span>
-          <span class="middle">2</span>
+          <span class="middle">
+            灵动岛
+          </span>
           <span class="right">
             <span class="battery">
-              <span class="battery-content"></span>
+              <span :style="{'width':batteryState.level*100+'%'}" class="battery-content">
+                {{batteryState.charging?'⚡':batteryState.level*100+'%'}}
+              </span>
             </span>
           </span>
         </div>
@@ -70,6 +73,11 @@
             imgUrl: '',
             // 控制图片显示动画
             timer: null,
+            // 电池状态
+            batteryState: {
+              charging: false, // 是否正在充电
+              level:undefined,  // 电量 0-1
+            },
           }
         },
         mounted() {
@@ -78,7 +86,15 @@
           this.videoHeight = document.documentElement.clientHeight
           this.videoWidth = document.documentElement.clientWidth
           this.canvasContext = this.canvas.getContext('2d')
+          // 调用摄像头
           this.getCamera()
+          // 轮询电池状态
+          setInterval(() => {
+            navigator.getBattery().then((battery) => {
+              this.batteryState.charging = battery.charging
+              this.batteryState.level=battery.level
+            })
+          }, 1000)
         },
         methods: {
           getCamera() {
