@@ -6,15 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>vue-camera</title>
     <script src="/static/js/vue.global.js"></script>
+    <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
     <link rel="stylesheet" href="/static/css/index.css" />
+
   </head>
 
   <body>
     <div id="app">
       <div class="iphone">
+        <div class="header">
+          <span class="left">中国电信</span>
+          <span class="middle">2</span>
+          <span class="right">
+            <span class="battery">
+              <span class="battery-content"></span>
+            </span>
+          </span>
+        </div>
         <div ref="imgRef" class="img">
           <span @click="back" class="back">
-            <img src="/static/images/back.svg" alt="">
+            <img src="/static/images/back.svg" alt="" />
           </span>
           <img :src="imgUrl" alt="" />
         </div>
@@ -159,15 +170,15 @@
               }, 60)
             }
           },
-          back(){
+          back() {
             let width = 0
             this.timer = setInterval(() => {
-                if (width > -100) {
-                  width -= 10
-                  this.$refs.imgRef.style.transform = `translateX(${width}%)`
-                }
-              }, 60)
-          }
+              if (width > -100) {
+                width -= 10
+                this.$refs.imgRef.style.transform = `translateX(${width}%)`
+              }
+            }, 60)
+          },
         },
       }).mount('#app')
     </script>
